@@ -10,7 +10,7 @@ type Encoder struct {
 	value []byte
 }
 
-func (e Encoder) FormatRequest(request *CubeRequest) (int32, []byte, error) {
+func (e Encoder) FormatRequest(request *CubeRequestBody) (int32, []byte, error) {
 	if request == nil {
 		return 0, nil, errors.New("empty ptr for request passed to encoder")
 	}
@@ -44,7 +44,7 @@ func formatHeader(header *CubeHeader) ([]byte, error) {
 	return b, nil
 }
 
-func formatBody(request *CubeRequest) (b []byte, err error) {
+func formatBody(request *CubeRequestBody) (b []byte, err error) {
 	if request == nil {
 		return nil, errors.New("empty ptr for request passed to body encoder")
 	}

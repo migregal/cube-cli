@@ -1,6 +1,6 @@
 package client
 
-type CubeRequest struct {
+type CubeRequestBody struct {
 	Token string
 	Scope string
 	SvcId int32
