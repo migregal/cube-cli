@@ -32,7 +32,7 @@ func (c *cubeClient) VerifyToken(token, scope string) (*CubeResponseBody, error)
 	defer conn.Close()
 
 	req := CubeRequestBody{SvcId: c.svcId, Token: token, Scope: scope}
-	_, bin, err := Encoder{}.FormatRequest(&req)
+	sReqId, bin, err := Encoder{}.FormatRequest(&req)
 	if err != nil {
 		return nil, err
 	}
@@ -52,9 +52,13 @@ func (c *cubeClient) VerifyToken(token, scope string) (*CubeResponseBody, error)
 	}
 
 	var resp *CubeResponseBody
-	resp, err = Decoder{}.DecodeResponse(buf.Bytes())
+	reqId, resp, err := Decoder{}.DecodeResponse(buf.Bytes())
 	if err != nil {
 		return nil, err
+	}
+
+	if reqId != sReqId {
+		return nil, errors.New("received response for other request")
 	}
 	return resp, nil
 }

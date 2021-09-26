@@ -7,19 +7,20 @@ import (
 
 type Decoder struct{}
 
-func (d Decoder) DecodeResponse(response []byte) (*CubeResponseBody, error) {
+func (d Decoder) DecodeResponse(response []byte) (int32, *CubeResponseBody, error) {
 	b := make([]byte, len(response))
 	if copy(b, response) != len(response) {
-		return nil, errors.New("failed to decode response")
+		return 0, nil, errors.New("failed to decode response")
 	}
 
 	h, err := decodeHeader(&b)
 	if err != nil {
-		return nil, err
+		return 0, nil, err
 	}
 
 	b = b[:h.bodyLength]
-	return decodeBody(&b)
+	body, err := decodeBody(&b)
+	return h.requestId, body, err
 }
 
 func decodeHeader(b *[]byte) (*CubeHeader, error) {
