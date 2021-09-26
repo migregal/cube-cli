@@ -10,7 +10,7 @@ type Encoder struct {
 	value []byte
 }
 
-func (e Encoder) FormatRequest(request *CubeRequest) (int, []byte, error) {
+func (e Encoder) FormatRequest(request *CubeRequest) (int32, []byte, error) {
 	if request == nil {
 		return 0, nil, errors.New("empty ptr for request passed to encoder")
 	}
@@ -20,25 +20,25 @@ func (e Encoder) FormatRequest(request *CubeRequest) (int, []byte, error) {
 		return 0, nil, err
 	}
 
-	reqId := rand.Int()
-	header, err := formatHeader(request.SvcId, len(b), reqId)
+	header := CubeHeader{svcId: request.SvcId, bodyLength: int32(len(b)), requestId: int32(rand.Uint32())}
+	hb, err := formatHeader(&header)
 	if err != nil {
 		return 0, nil, err
 	}
-	b = append(header, b...)
+	b = append(hb, b...)
 
-	return reqId, b, nil
+	return header.requestId, b, nil
 }
 
-func formatHeader(id, bodyLen, reqId int) ([]byte, error) {
+func formatHeader(header *CubeHeader) ([]byte, error) {
 	b := make([]byte, 0, 12)
-	if err := appendInt(&b, id); err != nil {
+	if err := appendInt(&b, header.svcId); err != nil {
 		return nil, err
 	}
-	if err := appendInt(&b, bodyLen); err != nil {
+	if err := appendInt(&b, header.bodyLength); err != nil {
 		return nil, err
 	}
-	if err := appendInt(&b, reqId); err != nil {
+	if err := appendInt(&b, header.requestId); err != nil {
 		return nil, err
 	}
 	return b, nil
@@ -68,14 +68,14 @@ func appendString(b *[]byte, value string) error {
 	if b == nil {
 		return errors.New("empty ptr passed to append string")
 	}
-	if err := appendInt(b, len(value)); err != nil {
+	if err := appendInt(b, int32(len(value))); err != nil {
 		return err
 	}
 	*b = append(*b, []byte(value)...)
 	return nil
 }
 
-func appendInt(b *[]byte, value int) error {
+func appendInt(b *[]byte, value int32) error {
 	if b == nil {
 		return errors.New("empty ptr passed to append int")
 	}
