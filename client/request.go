@@ -5,9 +5,3 @@ type CubeRequestBody struct {
 	Scope string
 	SvcId int32
 }
-
-type CubeHeader struct {
-	svcId      int32
-	bodyLength int32
-	requestId  int32
-}
