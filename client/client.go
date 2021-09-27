@@ -5,6 +5,7 @@ import (
 	"errors"
 	"io"
 	"net"
+	"time"
 )
 
 const TokenVerifySvcMsg = 0x00000001
@@ -13,6 +14,7 @@ type Conn interface {
 	Read(b []byte) (n int, err error)
 	Write(b []byte) (n int, err error)
 	Close() error
+	SetDeadline(t time.Time) error
 }
 
 type cubeClient struct {
@@ -36,6 +38,11 @@ func NewConnection(svcId int32, host string, port string) (*cubeClient, error) {
 }
 
 func (c *cubeClient) VerifyToken(token, scope string) (*CubeResponseBody, error) {
+	err := c.conn.SetDeadline(time.Now().Add(time.Second * 5))
+	if err != nil {
+		return nil, err
+	}
+
 	req := CubeRequestBody{SvcId: c.svcId, Token: token, Scope: scope}
 	sReqId, bin, err := Encoder{}.FormatRequest(&req)
 	if err != nil {
@@ -59,7 +66,7 @@ func (c *cubeClient) VerifyToken(token, scope string) (*CubeResponseBody, error)
 	var resp *CubeResponseBody
 	reqId, resp, err := Decoder{}.DecodeResponse(buf.Bytes())
 	if err != nil {
-		return nil, err
+		return nil, errors.New("failed to decode response")
 	}
 
 	if reqId != sReqId {
