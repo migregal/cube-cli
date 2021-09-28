@@ -43,36 +43,55 @@ func (c *cubeClient) VerifyToken(token, scope string) (*CubeResponseBody, error)
 		return nil, err
 	}
 
-	req := CubeRequestBody{SvcId: c.svcId, Token: token, Scope: scope}
-	sReqId, bin, err := Encoder{}.FormatRequest(&req)
+	sReqId, err := c.sendRequest(token, scope)
 	if err != nil {
 		return nil, err
 	}
 
-	n, err := c.conn.Write(bin)
+	reqId, resp, err := c.readResponse()
 	if err != nil {
 		return nil, err
 	}
-
-	if n != len(bin) {
-		return nil, errors.New("failed to send request")
-	}
-
-	var buf bytes.Buffer
-	if _, err = io.Copy(&buf, c.conn); err != nil {
-		return nil, err
-	}
-
-	var resp *CubeResponseBody
-	reqId, resp, err := Decoder{}.DecodeResponse(buf.Bytes())
-	if err != nil {
-		return nil, errors.New("failed to decode response")
-	}
-
+	
 	if reqId != sReqId {
 		return nil, errors.New("received response for other request")
 	}
 	return resp, nil
+}
+
+
+func (c *cubeClient) sendRequest(token, scope string) (reqId int32, err error) {
+	req := CubeRequestBody{SvcId: c.svcId, Token: token, Scope: scope}
+	reqId, bin, err := Encoder{}.FormatRequest(&req)
+	if err != nil {
+		return
+	}
+
+	n, err := c.conn.Write(bin)
+	if err != nil {
+		return
+	}
+
+	if n != len(bin) {
+		err = errors.New("failed to send request")
+		return
+	}
+
+	return
+}
+
+func (c *cubeClient) readResponse() (reqId int32, resp *CubeResponseBody, err error) {
+	var buf bytes.Buffer
+	if _, err = io.Copy(&buf, c.conn); err != nil {
+		return
+	}
+
+	reqId, resp, err = Decoder{}.DecodeResponse(buf.Bytes())
+	if err != nil {
+		return 0, nil, errors.New("failed to decode response")
+	}
+
+	return
 }
 
 func (c *cubeClient) CloseConnection() error {
