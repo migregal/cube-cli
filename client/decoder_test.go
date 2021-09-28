@@ -79,7 +79,7 @@ func TestDecoderDecodeHeader(t *testing.T) {
 func TestDecoderDecodeNilResponse(t *testing.T) {
 	_, err := decodeBody(nil)
 	if err == nil {
-		t.Fatal("Extracting of nil response successed")
+		t.Fatal("Extracting of nil response succeed")
 	}
 }
 
@@ -90,7 +90,7 @@ func TestDecoderDecodeBrokenResponseBody(t *testing.T) {
 
 	_, err := decodeBody(&b)
 	if err == nil {
-		t.Fatal("Extracting of broken response body successed")
+		t.Fatal("Extracting of broken response body succeed")
 	}
 }
 
@@ -102,7 +102,7 @@ func TestDecoderDecodeBrokenResponseBody2(t *testing.T) {
 
 	_, err := decodeBody(&b)
 	if err == nil {
-		t.Fatal("Extracting of broken response body successed")
+		t.Fatal("Extracting of broken response body succeed")
 	}
 }
 
@@ -115,7 +115,7 @@ func TestDecoderDecodeBrokenResponseBody3(t *testing.T) {
 
 	_, err := decodeBody(&b)
 	if err == nil {
-		t.Fatal("Extracting of broken response body successed")
+		t.Fatal("Extracting of broken response body succeed")
 	}
 }
 
@@ -135,7 +135,7 @@ func TestDecoderDecodeBrokenResponseBody4(t *testing.T) {
 
 	_, err := decodeBody(&b)
 	if err == nil {
-		t.Fatal("Extracting of broken response body successed")
+		t.Fatal("Extracting of broken response body succeed")
 	}
 }
 

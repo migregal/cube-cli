@@ -40,7 +40,7 @@ func TestEncoderEmptyReq(t *testing.T) {
 	_, _, err := e.FormatRequest(nil)
 
 	if err == nil {
-		t.Fatal("Encoding of empty request successed")
+		t.Fatal("Encoding of empty request succeed")
 	}
 
 	if fmt.Sprint(err) != "empty ptr for request passed to encoder" {
