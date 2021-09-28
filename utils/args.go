@@ -2,6 +2,8 @@ package utils
 
 import "errors"
 
+const HelpMsgFmt = "\nUsage: %s <host> <port> <token> <scope>\n\n"
+
 type Args struct {
 	Host  string
 	Port  string
