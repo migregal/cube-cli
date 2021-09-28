@@ -6,11 +6,9 @@ import (
 	"math/rand"
 )
 
-type Encoder struct {
-	value []byte
-}
+type Encoder struct{}
 
-func (e Encoder) FormatRequest(request *CubeRequestBody) (int32, []byte, error) {
+func (e Encoder) FormatRequest(request *CubeRequestBody) (RId, []byte, error) {
 	if request == nil {
 		return 0, nil, errors.New("empty ptr for request passed to encoder")
 	}
@@ -22,8 +20,8 @@ func (e Encoder) FormatRequest(request *CubeRequestBody) (int32, []byte, error) 
 
 	header := CubeHeader{
 		svcId:      request.SvcId,
-		bodyLength: int32(len(b)),
-		requestId:  rand.Int31(),
+		bodyLength: Int(len(b)),
+		requestId:  RId(rand.Int31()),
 	}
 	hb, err := formatHeader(&header)
 	if err != nil {
@@ -35,14 +33,15 @@ func (e Encoder) FormatRequest(request *CubeRequestBody) (int32, []byte, error) 
 }
 
 func formatHeader(header *CubeHeader) ([]byte, error) {
-	b := make([]byte, 0, 12)
+	b := make([]byte, 0, headerSize)
+
 	if err := appendInt(&b, header.svcId); err != nil {
 		return nil, err
 	}
 	if err := appendInt(&b, header.bodyLength); err != nil {
 		return nil, err
 	}
-	if err := appendInt(&b, header.requestId); err != nil {
+	if err := appendRId(&b, header.requestId); err != nil {
 		return nil, err
 	}
 	return b, nil
@@ -53,7 +52,7 @@ func formatBody(request *CubeRequestBody) (b []byte, err error) {
 		return nil, errors.New("empty ptr for request passed to body encoder")
 	}
 
-	b = make([]byte, 0, 4+len(request.Token)+len(request.Scope))
+	b = make([]byte, 0, intSize+len(request.Token)+len(request.Scope))
 
 	if err = appendInt(&b, TokenVerifySvcMsg); err != nil {
 		return nil, err
@@ -68,23 +67,28 @@ func formatBody(request *CubeRequestBody) (b []byte, err error) {
 	return b, nil
 }
 
+func appendInt(b *[]byte, value Int) error {
+	if b == nil {
+		return errors.New("empty ptr passed to append int")
+	}
+	temp := make([]byte, intSize)
+	binary.LittleEndian.PutUint32(temp, uint32(value))
+	*b = append(*b, temp...)
+	return nil
+}
+
+func appendRId(b *[]byte, value RId) error {
+	return appendInt(b, Int(value))
+}
+
 func appendString(b *[]byte, value string) error {
 	if b == nil {
 		return errors.New("empty ptr passed to append string")
 	}
-	if err := appendInt(b, int32(len(value))); err != nil {
+
+	if err := appendInt(b, Int(len(value))); err != nil {
 		return err
 	}
 	*b = append(*b, []byte(value)...)
-	return nil
-}
-
-func appendInt(b *[]byte, value int32) error {
-	if b == nil {
-		return errors.New("empty ptr passed to append int")
-	}
-	temp := make([]byte, 4)
-	binary.LittleEndian.PutUint32(temp, uint32(value))
-	*b = append(*b, temp...)
 	return nil
 }

@@ -32,7 +32,7 @@ func TestUnableToReadResponse(t *testing.T) {
 }
 
 func TestWrongResponseHeaderFormat(t *testing.T) {
-	c := cubeClient{svcId: 0, conn: mock.BrokenRespFmtMockConn{RespLen: 10}}
+	c := cubeClient{svcId: 0, conn: mock.BrokenRespFmtMockConn{RespLen: headerSize - 1}}
 	defer c.CloseConnection()
 
 	_, err := c.VerifyToken("token", "scope")
@@ -45,7 +45,7 @@ func TestWrongResponseHeaderFormat(t *testing.T) {
 }
 
 func TestWrongResponseBodyFormat(t *testing.T) {
-	c := cubeClient{svcId: 0, conn: mock.BrokenRespFmtMockConn{RespLen: 13}}
+	c := cubeClient{svcId: 0, conn: mock.BrokenRespFmtMockConn{RespLen: headerSize + 1}}
 	defer c.CloseConnection()
 
 	_, err := c.VerifyToken("token", "scope")

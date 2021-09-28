@@ -7,7 +7,7 @@ import (
 
 type Decoder struct{}
 
-func (d Decoder) DecodeResponse(response []byte) (int32, *CubeResponseBody, error) {
+func (d Decoder) DecodeResponse(response []byte) (RId, *CubeResponseBody, error) {
 	b := make([]byte, len(response))
 	if copy(b, response) != len(response) {
 		return 0, nil, errors.New("failed to decode response")
@@ -24,7 +24,7 @@ func (d Decoder) DecodeResponse(response []byte) (int32, *CubeResponseBody, erro
 }
 
 func decodeHeader(b *[]byte) (*CubeHeader, error) {
-	if len(*b) < 12 { // 3 numbers of header
+	if len(*b) < 3*intSize {
 		return nil, errors.New("byte slice is too short for header")
 	}
 	header := CubeHeader{}
@@ -40,7 +40,7 @@ func decodeHeader(b *[]byte) (*CubeHeader, error) {
 		return nil, err
 	}
 
-	header.requestId, err = extractInt(b)
+	header.requestId, err = extractRId(b)
 	if err != nil {
 		return nil, err
 	}
@@ -91,21 +91,21 @@ func decodeBody(b *[]byte) (*CubeResponseBody, error) {
 	return &body, nil
 }
 
-func extractInt(b *[]byte) (int32, error) {
+func extractInt(b *[]byte) (Int, error) {
 	if b == nil {
 		return 0, errors.New("empty ptr passed to extract int")
 	}
 
-	if len(*b) < 4 {
+	if len(*b) < intSize {
 		return 0, errors.New("too short data passed for int extraction")
 	}
 
 	defer func() {
 		temp := *b
-		*b = temp[4:]
+		*b = temp[intSize:]
 	}()
 
-	return int32(binary.LittleEndian.Uint32(*b)), nil
+	return Int(binary.LittleEndian.Uint32(*b)), nil
 }
 
 func extractInt64(b *[]byte) (int64, error) {
@@ -123,6 +123,11 @@ func extractInt64(b *[]byte) (int64, error) {
 	}()
 
 	return int64(binary.LittleEndian.Uint64(*b)), nil
+}
+
+func extractRId(b *[]byte) (RId, error) {
+	v, err := extractInt(b)
+	return RId(v), err
 }
 
 func extractString(b *[]byte) (string, error) {

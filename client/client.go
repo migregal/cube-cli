@@ -18,11 +18,11 @@ type Conn interface {
 }
 
 type cubeClient struct {
-	svcId int32
+	svcId Int
 	conn  Conn
 }
 
-func NewConnection(svcId int32, host string, port string) (*cubeClient, error) {
+func NewConnection(svcId Int, host string, port string) (*cubeClient, error) {
 	addr, err := net.ResolveTCPAddr("tcp", host+":"+port)
 	if err != nil {
 		return nil, err
@@ -52,15 +52,14 @@ func (c *cubeClient) VerifyToken(token, scope string) (*CubeResponseBody, error)
 	if err != nil {
 		return nil, err
 	}
-	
+
 	if reqId != sReqId {
 		return nil, errors.New("received response for other request")
 	}
 	return resp, nil
 }
 
-
-func (c *cubeClient) sendRequest(token, scope string) (reqId int32, err error) {
+func (c *cubeClient) sendRequest(token, scope string) (reqId RId, err error) {
 	req := CubeRequestBody{SvcId: c.svcId, Token: token, Scope: scope}
 	reqId, bin, err := Encoder{}.FormatRequest(&req)
 	if err != nil {
@@ -80,7 +79,7 @@ func (c *cubeClient) sendRequest(token, scope string) (reqId int32, err error) {
 	return
 }
 
-func (c *cubeClient) readResponse() (reqId int32, resp *CubeResponseBody, err error) {
+func (c *cubeClient) readResponse() (reqId RId, resp *CubeResponseBody, err error) {
 	var buf bytes.Buffer
 	if _, err = io.Copy(&buf, c.conn); err != nil {
 		return

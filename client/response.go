@@ -6,7 +6,7 @@ import (
 )
 
 const (
-	ok int32 = iota
+	ok Int = iota
 	tokenNotFound
 	dbError
 	unknownMsg
@@ -27,12 +27,12 @@ const (
 )
 
 type CubeResponseBody struct {
-	ReturnCode int32
+	ReturnCode Int
 
 	ClientId   string
-	ClientType int32
+	ClientType Int
 	Username   string
-	ExpiresIn  int32
+	ExpiresIn  Int
 	UserId     int64
 
 	ErrString string
@@ -72,7 +72,7 @@ func (crb *CubeResponseBody) buildOkString() string {
 	return buffer.String()
 }
 
-func getErrorMessageByCode(code int32) string {
+func getErrorMessageByCode(code Int) string {
 	switch code {
 	case ok:
 		return msgOk
