@@ -11,6 +11,9 @@ const SvcId = 0x00000002
 
 func main() {
 	args, err := utils.ParseArgs(os.Args)
+	if err != nil {
+		panic(err)
+	}
 
 	cli, err := client.NewConnection(SvcId, args.Host, args.Port)
 	if err != nil {
