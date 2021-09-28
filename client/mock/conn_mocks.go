@@ -1,4 +1,4 @@
-package client
+package mock
 
 import (
 	"errors"
@@ -43,7 +43,7 @@ func (c EmptyReadMockConn) SetDeadline(time.Time) error {
 }
 
 type BrokenRespFmtMockConn struct {
-	respLen int
+	RespLen int
 }
 
 func (c BrokenRespFmtMockConn) Write(b []byte) (int, error) {
@@ -51,7 +51,7 @@ func (c BrokenRespFmtMockConn) Write(b []byte) (int, error) {
 }
 
 func (c BrokenRespFmtMockConn) Read([]byte) (int, error) {
-	return c.respLen, io.EOF
+	return c.RespLen, io.EOF
 }
 
 func (c BrokenRespFmtMockConn) Close() error {
@@ -63,7 +63,7 @@ func (c BrokenRespFmtMockConn) SetDeadline(time.Time) error {
 }
 
 type FixedResponseMockConn struct {
-	expected []byte
+	Expected []byte
 }
 
 func (c FixedResponseMockConn) Write(b []byte) (int, error) {
@@ -71,8 +71,8 @@ func (c FixedResponseMockConn) Write(b []byte) (int, error) {
 }
 
 func (c FixedResponseMockConn) Read(b []byte) (int, error) {
-	copy(b, c.expected)
-	return len(c.expected), io.EOF
+	copy(b, c.Expected)
+	return len(c.Expected), io.EOF
 }
 
 func (c FixedResponseMockConn) Close() error {

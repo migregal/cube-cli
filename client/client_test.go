@@ -1,11 +1,12 @@
 package client
 
 import (
+	"cube_cli/client/mock"
 	"testing"
 )
 
 func TestUnableToSendRequest(t *testing.T) {
-	c := cubeClient{svcId: 0, conn: EmptyWriteMockConn{}}
+	c := cubeClient{svcId: 0, conn: mock.EmptyWriteMockConn{}}
 	defer c.CloseConnection()
 
 	_, err := c.VerifyToken("token", "scope")
@@ -18,7 +19,7 @@ func TestUnableToSendRequest(t *testing.T) {
 }
 
 func TestUnableToReadResponse(t *testing.T) {
-	c := cubeClient{svcId: 0, conn: EmptyReadMockConn{}}
+	c := cubeClient{svcId: 0, conn: mock.EmptyReadMockConn{}}
 	defer c.CloseConnection()
 
 	_, err := c.VerifyToken("token", "scope")
@@ -31,7 +32,7 @@ func TestUnableToReadResponse(t *testing.T) {
 }
 
 func TestWrongResponseHeaderFormat(t *testing.T) {
-	c := cubeClient{svcId: 0, conn: BrokenRespFmtMockConn{respLen: 10}}
+	c := cubeClient{svcId: 0, conn: mock.BrokenRespFmtMockConn{RespLen: 10}}
 	defer c.CloseConnection()
 
 	_, err := c.VerifyToken("token", "scope")
@@ -44,7 +45,7 @@ func TestWrongResponseHeaderFormat(t *testing.T) {
 }
 
 func TestWrongResponseBodyFormat(t *testing.T) {
-	c := cubeClient{svcId: 0, conn: BrokenRespFmtMockConn{respLen: 13}}
+	c := cubeClient{svcId: 0, conn: mock.BrokenRespFmtMockConn{RespLen: 13}}
 	defer c.CloseConnection()
 
 	_, err := c.VerifyToken("token", "scope")
@@ -57,7 +58,7 @@ func TestWrongResponseBodyFormat(t *testing.T) {
 }
 
 func TestWrongReqIdResponseHandling(t *testing.T) {
-	c := cubeClient{svcId: 0, conn: FixedResponseMockConn{expected: []byte{
+	c := cubeClient{svcId: 0, conn: mock.FixedResponseMockConn{Expected: []byte{
 		0, 0, 0, 0,
 		25, 0, 0, 0,
 		0, 0, 0, 0, // header
