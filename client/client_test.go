@@ -6,7 +6,7 @@ import (
 )
 
 func TestUnableToSendRequest(t *testing.T) {
-	c := cubeClient{svcId: 0, conn: mock.EmptyWriteMockConn{}}
+	c := cubeClient{svcId: 0, conn: mock.Conn{}}
 	defer c.CloseConnection()
 
 	_, err := c.VerifyToken("token", "scope")
@@ -19,7 +19,7 @@ func TestUnableToSendRequest(t *testing.T) {
 }
 
 func TestUnableToReadResponse(t *testing.T) {
-	c := cubeClient{svcId: 0, conn: mock.EmptyReadMockConn{}}
+	c := cubeClient{svcId: 0, conn: mock.Conn{Writtable: true, ReadError: true}}
 	defer c.CloseConnection()
 
 	_, err := c.VerifyToken("token", "scope")
@@ -27,12 +27,13 @@ func TestUnableToReadResponse(t *testing.T) {
 		t.Fatal("Failed reading passed")
 	}
 	if err.Error() != "unable to read" {
+		t.Log(err)
 		t.Fatal("Wrong error msg")
 	}
 }
 
 func TestWrongResponseHeaderFormat(t *testing.T) {
-	c := cubeClient{svcId: 0, conn: mock.BrokenRespFmtMockConn{RespLen: headerSize - 1}}
+	c := cubeClient{svcId: 0, conn: mock.Conn{Writtable: true, Response: []byte{0, 0}}}
 	defer c.CloseConnection()
 
 	_, err := c.VerifyToken("token", "scope")
@@ -45,7 +46,8 @@ func TestWrongResponseHeaderFormat(t *testing.T) {
 }
 
 func TestWrongResponseBodyFormat(t *testing.T) {
-	c := cubeClient{svcId: 0, conn: mock.BrokenRespFmtMockConn{RespLen: headerSize + 1}}
+	resp := make([]byte, headerSize+1)
+	c := cubeClient{svcId: 0, conn: mock.Conn{Writtable: true, Response: resp}}
 	defer c.CloseConnection()
 
 	_, err := c.VerifyToken("token", "scope")
@@ -58,16 +60,20 @@ func TestWrongResponseBodyFormat(t *testing.T) {
 }
 
 func TestWrongReqIdResponseHandling(t *testing.T) {
-	c := cubeClient{svcId: 0, conn: mock.FixedResponseMockConn{Expected: []byte{
-		0, 0, 0, 0,
-		25, 0, 0, 0,
-		0, 0, 0, 0, // header
-		1, 0, 0, 0, // return code == 1
-		17, 0, 0, 0,
-		99, 108, 105, 101, 110,
-		116, 32, 105, 100, 101, 110,
-		116, 105, 102, 105, 101, 114, // error_msg == "client identifier"
-	}}}
+	conn := mock.Conn{
+		Writtable: true,
+		Response: []byte{
+			0, 0, 0, 0,
+			25, 0, 0, 0,
+			0, 0, 0, 0, // header
+			1, 0, 0, 0, // return code == 1
+			17, 0, 0, 0,
+			99, 108, 105, 101, 110,
+			116, 32, 105, 100, 101, 110,
+			116, 105, 102, 105, 101, 114, // error_msg == "client identifier"
+		},
+	}
+	c := cubeClient{svcId: 0, conn: conn}
 	defer c.CloseConnection()
 
 	_, err := c.VerifyToken("token", "scope")

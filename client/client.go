@@ -10,16 +10,9 @@ import (
 
 const TokenVerifySvcMsg = 0x00000001
 
-type Conn interface {
-	Read(b []byte) (n int, err error)
-	Write(b []byte) (n int, err error)
-	Close() error
-	SetDeadline(t time.Time) error
-}
-
 type cubeClient struct {
 	svcId Int
-	conn  Conn
+	conn  net.Conn
 }
 
 func NewConnection(svcId Int, host string, port string) (*cubeClient, error) {

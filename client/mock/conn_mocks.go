@@ -3,82 +3,55 @@ package mock
 import (
 	"errors"
 	"io"
+	"net"
 	"time"
 )
 
-type EmptyWriteMockConn struct{}
+type Conn struct {
+	WriteError bool
+	Writtable  bool
+	ReadError  bool
+	Response   []byte
+}
 
-func (c EmptyWriteMockConn) Write([]byte) (int, error) {
+func (c Conn) Read(b []byte) (n int, err error) {
+	if c.ReadError {
+		return 0, errors.New("unable to read")
+	}
+	copy(b, c.Response)
+	return len(c.Response), io.EOF
+}
+
+func (c Conn) Write(b []byte) (n int, err error) {
+	if c.WriteError {
+		return 0, errors.New("unable to write")
+	}
+	if c.Writtable {
+		return len(b), nil
+	}
 	return 0, nil
 }
 
-func (c EmptyWriteMockConn) Read([]byte) (int, error) {
-	return 0, io.EOF
-}
-
-func (c EmptyWriteMockConn) Close() error {
+func (c Conn) Close() error {
 	return nil
 }
 
-func (c EmptyWriteMockConn) SetDeadline(time.Time) error {
+func (c Conn) LocalAddr() net.Addr {
 	return nil
 }
 
-type EmptyReadMockConn struct{}
-
-func (c EmptyReadMockConn) Write(b []byte) (int, error) {
-	return len(b), nil
-}
-
-func (c EmptyReadMockConn) Read(b []byte) (int, error) {
-	return 0, errors.New("unable to read")
-}
-
-func (c EmptyReadMockConn) Close() error {
+func (c Conn) RemoteAddr() net.Addr {
 	return nil
 }
 
-func (c EmptyReadMockConn) SetDeadline(time.Time) error {
+func (c Conn) SetDeadline(t time.Time) error {
 	return nil
 }
 
-type BrokenRespFmtMockConn struct {
-	RespLen int
-}
-
-func (c BrokenRespFmtMockConn) Write(b []byte) (int, error) {
-	return len(b), nil
-}
-
-func (c BrokenRespFmtMockConn) Read([]byte) (int, error) {
-	return c.RespLen, io.EOF
-}
-
-func (c BrokenRespFmtMockConn) Close() error {
+func (c Conn) SetReadDeadline(t time.Time) error {
 	return nil
 }
 
-func (c BrokenRespFmtMockConn) SetDeadline(time.Time) error {
-	return nil
-}
-
-type FixedResponseMockConn struct {
-	Expected []byte
-}
-
-func (c FixedResponseMockConn) Write(b []byte) (int, error) {
-	return len(b), nil
-}
-
-func (c FixedResponseMockConn) Read(b []byte) (int, error) {
-	copy(b, c.Expected)
-	return len(c.Expected), io.EOF
-}
-
-func (c FixedResponseMockConn) Close() error {
-	return nil
-}
-
-func (c FixedResponseMockConn) SetDeadline(time.Time) error {
+func (c Conn) SetWriteDeadline(t time.Time) error {
 	return nil
 }
