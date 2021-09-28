@@ -20,7 +20,11 @@ func (e Encoder) FormatRequest(request *CubeRequestBody) (int32, []byte, error) 
 		return 0, nil, err
 	}
 
-	header := CubeHeader{svcId: request.SvcId, bodyLength: int32(len(b)), requestId: int32(rand.Int31())}
+	header := CubeHeader{
+		svcId:      request.SvcId,
+		bodyLength: int32(len(b)),
+		requestId:  rand.Int31(),
+	}
 	hb, err := formatHeader(&header)
 	if err != nil {
 		return 0, nil, err

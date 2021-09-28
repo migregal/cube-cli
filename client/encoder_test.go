@@ -62,16 +62,15 @@ func TestEncoderReq(t *testing.T) {
 	e := Encoder{}
 	reqId, reqBin, _ := e.FormatRequest(&request)
 
-	reqIdB := make([]byte, 4)
-	binary.LittleEndian.PutUint32(reqIdB, uint32(reqId))
 	expected := []byte{
 		0, 0, 0, 0, // svc_id
 		22, 0, 0, 0, // body length
-		reqIdB[0], reqIdB[1], reqIdB[2], reqIdB[3], // req_id
+		0, 0, 0, 0, // req_id
 		1, 0, 0, 0, // svc_msg
 		5, 0, 0, 0, 116, 111, 107, 101, 110, // string "token"
 		5, 0, 0, 0, 115, 99, 111, 112, 101, // string "scope"
 	}
+	binary.LittleEndian.PutUint32(expected[8:], uint32(reqId))
 
 	if bytes.Compare(reqBin, expected) != 0 {
 		t.Fatalf("Encoding of request %+v failed", request)
