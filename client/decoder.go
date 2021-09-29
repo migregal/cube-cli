@@ -24,7 +24,7 @@ func (d Decoder) DecodeResponse(response []byte) (RId, *CubeResponseBody, error)
 }
 
 func decodeHeader(b *[]byte) (*CubeHeader, error) {
-	if len(*b) < 3*intSize {
+	if len(*b) < ridSize+2*intSize {
 		return nil, errors.New("byte slice is too short for header")
 	}
 	header := CubeHeader{}
@@ -108,21 +108,21 @@ func extractInt(b *[]byte) (Int, error) {
 	return Int(binary.LittleEndian.Uint32(*b)), nil
 }
 
-func extractInt64(b *[]byte) (int64, error) {
+func extractInt64(b *[]byte) (Int64, error) {
 	if b == nil {
 		return 0, errors.New("empty ptr passed to extract int")
 	}
 
-	if len(*b) < 8 {
+	if len(*b) < intSize64 {
 		return 0, errors.New("too short data passed for int64 extraction")
 	}
 
 	defer func() {
 		temp := *b
-		*b = temp[8:]
+		*b = temp[intSize64:]
 	}()
 
-	return int64(binary.LittleEndian.Uint64(*b)), nil
+	return Int64(binary.LittleEndian.Uint64(*b)), nil
 }
 
 func extractRId(b *[]byte) (RId, error) {
@@ -135,7 +135,7 @@ func extractString(b *[]byte) (string, error) {
 		return "", errors.New("empty ptr passed to extract string")
 	}
 
-	if len(*b) < 4 {
+	if len(*b) < intSize {
 		return "", errors.New("too short data passed for string len extraction")
 	}
 

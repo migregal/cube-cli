@@ -15,7 +15,7 @@ func TestEncoderEncodeInt(t *testing.T) {
 	}
 
 	expected := []byte{10, 0, 0, 0}
-	if bytes.Compare(b, expected) != 0 {
+	if !bytes.Equal(b, expected) {
 		t.Fatal("Encoding of int failed")
 	}
 }
@@ -30,7 +30,7 @@ func TestEncoderEncodeString(t *testing.T) {
 	expected := []byte{11, 0, 0, 0,
 		116, 101, 115, 116, 32, 115, 116, 114, 105, 110, 103,
 	}
-	if bytes.Compare(b, expected) != 0 {
+	if !bytes.Equal(b, expected) {
 		t.Fatal("Encoding of int failed")
 	}
 }
@@ -72,7 +72,7 @@ func TestEncoderReq(t *testing.T) {
 	}
 	binary.LittleEndian.PutUint32(expected[8:], uint32(reqId))
 
-	if bytes.Compare(reqBin, expected) != 0 {
+	if !bytes.Equal(reqBin, expected) {
 		t.Fatalf("Encoding of request %+v failed", request)
 	}
 }

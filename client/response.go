@@ -5,27 +5,6 @@ import (
 	"fmt"
 )
 
-const (
-	ok Int = iota
-	tokenNotFound
-	dbError
-	unknownMsg
-	badPacket
-	badClient
-	badScope
-)
-
-const (
-	msgOk            = "ok"
-	msgTokenNotFound = "token not found"
-	msgDbError       = "db error"
-	msgUnknownMsg    = "unknown svc msg"
-	msgBadPacket     = "bad packet"
-	msgBadClient     = "bad client"
-	msgBadScope      = "bad scope"
-	msgUnknownError  = "unknown error"
-)
-
 type CubeResponseBody struct {
 	ReturnCode Int
 
@@ -33,7 +12,7 @@ type CubeResponseBody struct {
 	ClientType Int
 	Username   string
 	ExpiresIn  Int
-	UserId     int64
+	UserId     Int64
 
 	ErrString string
 }
@@ -70,25 +49,4 @@ func (crb *CubeResponseBody) buildOkString() string {
 	buffer.WriteString(fmt.Sprintf("username: %s\n", crb.Username))
 
 	return buffer.String()
-}
-
-func getErrorMessageByCode(code Int) string {
-	switch code {
-	case ok:
-		return msgOk
-	case tokenNotFound:
-		return msgTokenNotFound
-	case dbError:
-		return msgDbError
-	case unknownMsg:
-		return msgUnknownMsg
-	case badPacket:
-		return msgBadPacket
-	case badClient:
-		return msgBadClient
-	case badScope:
-		return msgBadScope
-	default:
-		return msgUnknownError
-	}
 }

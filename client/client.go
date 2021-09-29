@@ -2,13 +2,12 @@ package client
 
 import (
 	"bytes"
+	"cube_cli/client/utils"
 	"errors"
 	"io"
 	"net"
 	"time"
 )
-
-const TokenVerifySvcMsg = 0x00000001
 
 type cubeClient struct {
 	svcId Int
@@ -31,7 +30,8 @@ func NewConnection(svcId Int, host string, port string) (*cubeClient, error) {
 }
 
 func (c *cubeClient) VerifyToken(token, scope string) (*CubeResponseBody, error) {
-	err := c.conn.SetDeadline(time.Now().Add(time.Second * 5))
+	timeout := utils.GetIntEnv(ConnectionTimeoutEnv, DefaultTimeout)
+	err := c.conn.SetDeadline(time.Now().Add(time.Second * time.Duration(timeout)))
 	if err != nil {
 		return nil, err
 	}
